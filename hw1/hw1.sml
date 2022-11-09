@@ -1,9 +1,15 @@
 fun is_older(d1 : int*int*int ,d2 : int*int*int) =
-    if #1 d1 < #1 d2
-    then true
-    else if #1 d1 = #1 d2 andalso #2 d1 < #2 d2 then true
-    else if #1 d1 = #1 d2 andalso #2 d1 = #2 d2 andalso #3 d1 < #3 d2 then true
-    else false
+    let
+        val y1 = #1 d1
+        val m1 = #2 d1
+        val d1 = #3 d1
+        val y2 = #1 d2
+        val m2 = #2 d2
+        val d2 = #3 d2
+    in
+        y1 < y2 orelse (y1 = y2 andalso m1 < m2) 
+        orelse (y1 = y2 andalso m1 = m2 andalso d1 < d2)
+    end
 
 fun number_in_month(dates : (int*int*int) list,month : int) =
     if null dates
@@ -68,3 +74,49 @@ fun oldest(dates : (int*int*int) list) =
             then ret
             else SOME(hd dates)
         end
+
+fun is_unique(x : int, xs : int list) = 
+    not (null xs) andalso (x = (hd xs) orelse is_unique(x, tl xs))
+
+fun remove_duplicates(xs : int list) =
+    if null xs
+    then []
+    else
+        let
+            val tl_ans = remove_duplicates(tl xs)
+        in
+            if is_unique(hd xs, tl_ans)
+            then tl_ans
+            else (hd xs)::tl_ans
+        end
+
+fun number_in_months_challenge(dates : (int*int*int) list, months : int list) =
+    let
+        val new_months = remove_duplicates(months)
+    in
+        number_in_months(dates, new_months)
+    end
+
+fun dates_in_months_challenge(dates : (int*int*int) list, months: int list) =
+    let 
+        val new_months = remove_duplicates(months)
+    in
+        dates_in_months(dates, new_months)
+    end
+
+fun reasonable_date(date: int * int * int) =
+    let    
+        fun get_nth (lst : int list, n : int) =
+        if n=1
+        then hd lst
+        else get_nth(tl lst, n-1)
+        val year  = #1 date
+        val month = #2 date
+        val day   = #3 date
+        val leap  = year mod 400 = 0 orelse (year mod 4 = 0 andalso year mod 100 <> 0)
+        val feb_len = if leap then 29 else 28
+        val lengths = [31,feb_len,31,30,31,30,31,31,30,31,30,31]
+    in
+        year > 0 andalso month >= 1 andalso month <= 12
+        andalso day >= 1 andalso day <= get_nth(lengths,month)
+    end
